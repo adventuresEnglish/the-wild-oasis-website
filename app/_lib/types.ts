@@ -38,3 +38,17 @@ export type Country = {
   name: string;
   flag: string;
 };
+
+export type TFilter = "all" | "small" | "medium" | "large";
+
+export type BookingDates = {
+  startDate: string;
+  endDate: string;
+};
+
+export type Settings = {
+  minBookingLength: number;
+  maxBookingLength: number;
+  maxNumberOfGuestsPerBooking: number;
+  breakfastPrice: number;
+};

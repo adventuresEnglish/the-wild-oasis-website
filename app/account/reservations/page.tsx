@@ -1,4 +1,4 @@
-import ReservationCard from "@/app/_components/reservation-card";
+import ReservationCard from "@/app/_components/Rreservation-card";
 import { Booking } from "@/app/_lib/types";
 
 export const metadata = {

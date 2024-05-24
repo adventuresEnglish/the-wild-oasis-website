@@ -1,4 +1,4 @@
-import SelectCountry from "@/app/_components/select-country";
+import SelectCountry from "@/app/_components/SelectCountry";
 import Image from "next/image";
 
 export default function Page() {

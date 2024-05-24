@@ -1,21 +1,21 @@
-//import { eachDayOfInterval } from "date-fns";
+import { eachDayOfInterval } from "date-fns";
 //import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation.js";
 import { supabase } from "./supabase.js";
-import { Booking, Country, Guest } from "./types";
+import { Booking, BookingDates, Country, Guest } from "./types";
 
 /////////////
 // GET
 
-export async function getCabin(id: number) {
+export async function getCabin(id: string) {
   const { data, error } = await supabase
     .from("cabins")
     .select("*")
     .eq("id", id)
     .single();
 
-  // For testing
-  // await new Promise((res) => setTimeout(res, 1000));
+  //For testing
+  await new Promise((res) => setTimeout(res, 2000));
 
   if (error) {
     console.error(error);
@@ -35,7 +35,7 @@ export async function getNumCabins() {
   return data.length;
 }
 
-export async function getCabinPrice(id: number) {
+export async function getCabinPrice(id: string) {
   const { data, error } = await supabase
     .from("cabins")
     .select("regularPrice, discount")
@@ -111,38 +111,39 @@ export async function getBookings(guestId: number) {
   return data;
 }
 
-// export async function getBookedDatesByCabinId(cabinId: number) {
-//   let today = new Date();
-//   today.setUTCHours(0, 0, 0, 0);
-//   today = today.toISOString();
+export async function getBookedDatesByCabinId(cabinId: string) {
+  let today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
 
-//   Getting all bookings
-//   const { data, error } = await supabase
-//     .from("bookings")
-//     .select("*")
-//     .eq("cabinId", cabinId)
-//     .or(`startDate.gte.${today},status.eq.checked-in`);
+  //Getting all bookings
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("cabinId", cabinId)
+    .or(`startDate.gte.${today.toISOString()},status.eq.checked-in`);
 
-//   if (error) {
-//     console.error(error);
-//     throw new Error("Bookings could not get loaded");
-//   }
+  if (error) {
+    console.error(error);
+    throw new Error("Bookings could not get loaded");
+  }
 
-//   Converting to actual dates to be displayed in the date picker
-//   const bookedDates = data
-//     .map((booking) => {
-//       return eachDayOfInterval({
-//         start: new Date(booking.startDate),
-//         end: new Date(booking.endDate),
-//       });
-//     })
-//     .flat();
+  //Converting to actual dates to be displayed in the date picker
+  const bookedDates = data
+    .map((booking: BookingDates) => {
+      return eachDayOfInterval({
+        start: new Date(booking.startDate),
+        end: new Date(booking.endDate),
+      });
+    })
+    .flat();
 
-//   return bookedDates;
-// }
+  return bookedDates;
+}
 
 export async function getSettings() {
   const { data, error } = await supabase.from("settings").select("*").single();
+
+  await new Promise((res) => setTimeout(res, 2000));
 
   if (error) {
     console.error(error);
@@ -182,7 +183,7 @@ export async function createBooking(newBooking: Booking) {
   const { data, error } = await supabase
     .from("bookings")
     .insert([newBooking])
-    // So that the newly created object gets returned!
+    // So that the newly created object gets returned!d
     .select()
     .single();
 
