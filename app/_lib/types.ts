@@ -52,3 +52,9 @@ export type Settings = {
   maxNumberOfGuestsPerBooking: number;
   breakfastPrice: number;
 };
+
+export type User = {
+  name: string;
+  email: string;
+  image: string;
+};

@@ -36,6 +36,8 @@ export default async function CabinIdPage({
   //     getBookedDatesByCabinId(params.cabinId),
   //   ])
 
+  // in summary this really just serves as a an examplem bc Reserse Cabin Name could just as easily be rendered in DisplayCabin. We could possibly await getCabin in reservation by simply passing the params to it instead of the entire object, just as we did above. HOWEVER, this is a good example of how to avoid a waterfall situation by streaming data in from seperate components. The top doesnt have to wait for the bottom to finish rendering as it is suspended until the data is ready.
+
   return (
     <div className="max-w-6xl mx-auto mt-8">
       <DisplayCabin cabinId={cabin.id} />

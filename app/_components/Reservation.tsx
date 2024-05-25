@@ -1,5 +1,7 @@
+import LoginMessage from "@/app/_components/LoginMessage";
+import { auth } from "../_lib/auth";
 import { getBookedDatesByCabinId, getSettings } from "../_lib/data-service";
-import { Cabin } from "../_lib/types";
+import { Cabin, User } from "../_lib/types";
 import DateSelector from "./DateSelector";
 import ReservationForm from "./ReservationForm";
 
@@ -8,7 +10,9 @@ async function Reservation({ cabin }: { cabin: Cabin }) {
     getSettings(),
     getBookedDatesByCabinId(cabin.id as unknown as string),
   ]);
-  console.log("settings", settings);
+
+  const session = await auth();
+
   return (
     <div className="grid grid-cols-2 border border-primary-800 min-h-[400px]">
       <DateSelector
@@ -16,7 +20,14 @@ async function Reservation({ cabin }: { cabin: Cabin }) {
         bookedDates={bookedDates}
         cabin={cabin}
       />
-      <ReservationForm cabin={cabin} />
+      {session?.user ? (
+        <ReservationForm
+          cabin={cabin}
+          user={session.user as User}
+        />
+      ) : (
+        <LoginMessage />
+      )}
     </div>
   );
 }
