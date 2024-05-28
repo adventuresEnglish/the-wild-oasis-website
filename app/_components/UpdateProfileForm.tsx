@@ -13,9 +13,9 @@ function UpdateProfileForm({
   //  children: React.ReactNode;
   guest: Guest;
 }) {
-  const { fullName, email, nationality, nationalID, countryFlag } = guest;
+  const { fullName, email, nationality, nationalID } = guest;
   const [inputNationalID, setInputNationalID] = useState(nationalID);
-  const [inputNationality, setInputNationality] = useState<string>();
+  const [inputNationality, setInputNationality] = useState(nationality);
 
   const countries = getCountries();
   const flag =
@@ -48,9 +48,9 @@ function UpdateProfileForm({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label htmlFor="nationality">Where are you from?</label>
-          {(flag || countryFlag) && (
+          {flag && (
             <img
-              src={flag || countryFlag}
+              src={flag}
               alt="Country flag"
               className="h-5 rounded-sm"
             />
@@ -60,14 +60,14 @@ function UpdateProfileForm({
           name="nationality"
           id="nationality"
           // Here we use a trick to encode BOTH the country name and the flag into the value. Then we split them up again later in the server action
-          defaultValue={`${nationality}%${flag}`}
-          onChange={(e) => setInputNationality(e.target.value.split("%")[0])}
+          defaultValue={nationality}
+          onChange={(e) => setInputNationality(e.target.value)}
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm">
           <option value="">Select country...</option>
           {countries.map((c) => (
             <option
               key={c.name}
-              value={`${c.name}%${c.flag}`}>
+              value={c.name}>
               {c.name}
             </option>
           ))}

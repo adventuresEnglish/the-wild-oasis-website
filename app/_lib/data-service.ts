@@ -94,7 +94,7 @@ export async function getBooking(id: number) {
   return data;
 }
 
-export async function getBookings(guestId: number) {
+export async function getBookings(guestId: string) {
   const { data, error, count } = await supabase
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
