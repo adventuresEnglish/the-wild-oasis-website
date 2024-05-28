@@ -1,6 +1,6 @@
 import { getCabinPrice } from "@/app/_lib/data-service";
 
-async function Price({ cabinId }: { cabinId: number }) {
+async function Price({ cabinId }: { cabinId: string }) {
   const { regularPrice, discount } = await getCabinPrice(cabinId);
 
   return (

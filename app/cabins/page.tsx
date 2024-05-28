@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import CabinList from "../_components/CabinList";
 import Spinner from "../_components/Spinner";
 
-import Filter from "../_components/filter";
+import Filter from "../_components/Filter";
 import { TFilter } from "../_lib/types";
 
 export const metadata = {

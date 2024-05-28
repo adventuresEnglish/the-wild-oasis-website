@@ -1,3 +1,12 @@
+import { Session as NextAuthSession, User as NextAuthUser } from "next-auth";
+
+export interface User extends NextAuthUser {
+  guestId?: string | null;
+}
+export interface Session extends NextAuthSession {
+  user?: User;
+}
+
 export type Cabin = {
   id: number;
   name: string;
@@ -26,7 +35,7 @@ export type Booking = {
 
 export type Guest = {
   id: number;
-  created_at?: string;
+  created_at: string;
   fullName: string;
   email: string;
   nationalID: string;
@@ -53,8 +62,9 @@ export type Settings = {
   breakfastPrice: number;
 };
 
-export type User = {
-  name: string;
-  email: string;
-  image: string;
-};
+// export type User = {
+//   name: string;
+//   email: string;
+//   image: string;
+//   //emailVerified: Date | null;
+// };

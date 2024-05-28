@@ -1,8 +1,9 @@
 import { eachDayOfInterval } from "date-fns";
 //import { unstable_noStore as noStore } from "next/cache";
+//import countries from "country-json/src/country-by-flag.json";
 import { notFound } from "next/navigation.js";
 import { supabase } from "./supabase.js";
-import { Booking, BookingDates, Country, Guest } from "./types";
+import { Booking, BookingDates, Guest } from "./types";
 
 /////////////
 // GET
@@ -67,7 +68,7 @@ export const getCabins = async function () {
 };
 
 // Guests are uniquely identified by their email address
-export async function getGuest(email: string) {
+export async function getGuest(email?: string | null | undefined) {
   const { data, error } = await supabase
     .from("guests")
     .select("*")
@@ -153,22 +154,37 @@ export async function getSettings() {
   return data;
 }
 
-export async function getCountries() {
-  try {
-    const res = await fetch(
-      "https://restcountries.com/v2/all?fields=name,flag"
-    );
-    const countries: Country[] = await res.json();
-    return countries;
-  } catch {
-    throw new Error("Could not fetch countries");
-  }
-}
+// export async function getCountries() {
+//   try {
+//     const res = await fetch(
+//       "https://restcountries.com/v2/all?fields=name,flag"
+//     );
+//     const countries: Country[] = await res.json();
+//     console.log("countries", countries);
+//     return countries;
+//   } catch {
+//     throw new Error("Could not fetch countries");
+//   }
+// }
 
-///////////
-// CREATE
+// export function getCountries() {
+//   const countryArray = countries as Array<{
+//     country: string;
+//     flag_base64: string;
+//   }>;
+//   const transformedCountries: Country[] = countryArray.map((country) => ({
+//     name: country.country,
+//     flag: country.flag_base64,
+//   }));
 
-export async function createGuest(newGuest: Guest) {
+//   // console.log(
+//   //   "countries",
+//   //   transformedCountries.map((c) => c.name)
+//   // );
+//   return transformedCountries;
+// }
+
+export async function createGuest(newGuest: Pick<Guest, "email" | "fullName">) {
   const { data, error } = await supabase.from("guests").insert([newGuest]);
 
   if (error) {
@@ -197,22 +213,22 @@ export async function createBooking(newBooking: Booking) {
 
 /////////////
 // UPDATE
-export type GuestUpdate = Partial<Guest>;
-// The updatedFields is an object which should ONLY contain the updated data
-export async function updateGuest(id: number, updatedFields: GuestUpdate) {
-  const { data, error } = await supabase
-    .from("guests")
-    .update(updatedFields)
-    .eq("id", id)
-    .select()
-    .single();
+// export type GuestUpdate = Partial<Guest>;
+// // The updatedFields is an object which should ONLY contain the updated data
+// export async function updateGuest(id: string, updatedFields: GuestUpdate) {
+//   const { data, error } = await supabase
+//     .from("guests")
+//     .update(updatedFields)
+//     .eq("id", id)
+//     .select()
+//     .single();
 
-  if (error) {
-    console.error(error);
-    throw new Error("Guest could not be updated");
-  }
-  return data;
-}
+//   if (error) {
+//     console.error(error);
+//     throw new Error("Guest could not be updated");
+//   }
+//   return data;
+// }
 
 export type BookingUpdate = Partial<Booking>;
 

@@ -1,4 +1,4 @@
-import ReservationCard from "@/app/_components/Rreservation-card";
+import ReservationCard from "@/app/_components/ReservationCard";
 import { Booking } from "@/app/_lib/types";
 
 export default function Page() {
