@@ -1,18 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
 import { updateGuestAction } from "../_lib/actions";
 import { getCountries } from "../_lib/getCountries";
 import { Guest } from "../_lib/types";
+import SubmitButton from "./SubmitButton";
 
-function UpdateProfileForm({
-  guest,
-}: // children,
-{
-  //  children: React.ReactNode;
-  guest: Guest;
-}) {
+function UpdateProfileForm({ guest }: { guest: Guest }) {
   const { fullName, email, nationality, nationalID } = guest;
   const [inputNationalID, setInputNationalID] = useState(nationalID);
   const [inputNationality, setInputNationality] = useState(nationality);
@@ -85,26 +79,15 @@ function UpdateProfileForm({
       </div>
 
       <div className="flex justify-end items-center gap-6">
-        <Button
+        <SubmitButton
+          pendingLabel="Updating..."
           disabled={
             inputNationality === nationality && inputNationalID === nationalID
-          }
-        />
+          }>
+          Update Profile
+        </SubmitButton>
       </div>
     </form>
-  );
-}
-
-//useFormStatus must be used in a component that is rendered within a form
-function Button({ disabled }: { disabled: boolean }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300"
-      disabled={disabled || pending}>
-      {pending ? "updating" : "Update profile"}
-    </button>
   );
 }
 

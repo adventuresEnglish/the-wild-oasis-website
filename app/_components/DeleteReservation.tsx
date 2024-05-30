@@ -2,15 +2,20 @@
 
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { useTransition } from "react";
-import { deleteReservation } from "../_lib/actions";
 import SpinnerMini from "./SpinnerMini";
 
-function DeleteReservation({ bookingId }: { bookingId: number }) {
+function DeleteReservation({
+  bookingId,
+  onDelete,
+}: {
+  bookingId: number;
+  onDelete: (bookingId: number) => void;
+}) {
   const [isPending, startTransition] = useTransition();
-
+  //the transition is essentially useless it seems as we are optimistically updating and so will not have a loading spinnner, however, if there is latency in the delete operation, we could use the transition to show a spinner while the operation is pending.
   function handleDelete() {
     if (confirm("Are you sure you want to delete this reservation?"))
-      startTransition(() => deleteReservation(bookingId));
+      startTransition(() => onDelete(bookingId));
   }
 
   return (

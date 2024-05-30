@@ -27,9 +27,11 @@ export type Booking = {
   numGuests: number;
   status: string;
   created_at: string;
+  observations: string;
   cabins: {
     name: string;
     image: string;
+    maxCapacity: number;
   };
 };
 
@@ -62,9 +64,16 @@ export type Settings = {
   breakfastPrice: number;
 };
 
-// export type User = {
-//   name: string;
-//   email: string;
-//   image: string;
-//   //emailVerified: Date | null;
-// };
+export type BookingData = {
+  cabinId: number;
+  startDate?: Date;
+  endDate?: Date;
+  numNights: number;
+  cabinPrice: number;
+  [key: string]: any;
+};
+
+export type ValidatedBookingData = BookingData & {
+  startDate: Date;
+  endDate: Date;
+};

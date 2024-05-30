@@ -79,10 +79,10 @@ export async function getGuest(email?: string | null | undefined) {
   return data;
 }
 
-export async function getBooking(id: number) {
+export async function getBooking(id: string) {
   const { data, error, count } = await supabase
     .from("bookings")
-    .select("*")
+    .select("observations, numGuests, cabins(maxCapacity)")
     .eq("id", id)
     .single();
 

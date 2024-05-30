@@ -1,14 +1,38 @@
 "use client";
 
+import { differenceInDays } from "date-fns";
 import Image from "next/image";
+import { useState } from "react";
+import { createBookingAction } from "../_lib/actions";
 import { formatDate } from "../_lib/helpers";
-import { Cabin, User } from "../_lib/types";
+import { Cabin, User, ValidatedBookingData } from "../_lib/types";
+import { validateBookingData } from "../_lib/validation";
 import { useReservation } from "./ReservationContext";
+import SubmitButton from "./SubmitButton";
 
 function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
-  // CHANGE
-  const { maxCapacity } = cabin;
-  const { range } = useReservation();
+  const [selectedOption, setSelectedOption] = useState("");
+
+  const { range, resetRange } = useReservation();
+  const { maxCapacity, regularPrice, discount, id } = cabin;
+
+  const startDate = range.from;
+  const endDate = range.to;
+
+  const numNights = differenceInDays(startDate!, endDate!);
+  const cabinPrice = numNights * (regularPrice - discount);
+
+  const bookingData = {
+    cabinId: id,
+    startDate,
+    endDate,
+    numNights,
+    cabinPrice,
+  };
+
+  const createBookingWithData = validateBookingData(bookingData)
+    ? createBookingAction.bind(null, bookingData as ValidatedBookingData)
+    : undefined;
 
   return (
     <div className="scale-[1.01]">
@@ -16,30 +40,49 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
         <p>Logged in as</p>
 
         <div className="flex gap-4 items-center ">
-          <Image
-            referrerPolicy="no-referrer"
-            className="rounded-full h-8"
-            src={user.image}
-            alt={user.name}
-            height={32}
-            width={32}
-          />
+          {user.image && user.name && (
+            <Image
+              referrerPolicy="no-referrer"
+              className="rounded-full h-8"
+              src={user.image}
+              alt={user.name}
+              height={32}
+              width={32}
+            />
+          )}
           <p>{user.name}</p>
         </div>
       </div>
       <p>
-        {range.from && formatDate(range.from) + " to"}{" "}
-        {range.to && formatDate(range.to)}
+        {startDate && formatDate(startDate)}
+        {startDate && endDate && " to "}
+        {endDate && formatDate(endDate)}
       </p>
 
-      <form className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col">
+      <form
+        action={async (formData) => {
+          await createBookingWithData!(formData);
+          resetRange();
+          setSelectedOption("");
+        }}
+        //action={createBookingWithData}
+        className="bg-primary-900 py-10 px-16 flex text-lg gap-5 flex-col">
         <div className="space-y-2">
           <label htmlFor="numGuests">How many guests?</label>
           <select
             name="numGuests"
             id="numGuests"
             className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
-            required>
+            required
+            onChange={(e) => setSelectedOption(e.target.value)}
+            onInvalid={(e) => {
+              (e.target as HTMLSelectElement).setCustomValidity(
+                "Please select the number of guests."
+              );
+            }}
+            onInput={(e) => {
+              (e.target as HTMLSelectElement).setCustomValidity("");
+            }}>
             <option
               value=""
               key="">
@@ -68,11 +111,19 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
         </div>
 
         <div className="flex justify-end items-center gap-6">
-          <p className="text-primary-300 text-base">Start by selecting dates</p>
+          <p className="text-primary-300 text-base">
+            {!startDate || !endDate
+              ? "Start by selecting dates"
+              : !selectedOption
+              ? "Please select number of guests."
+              : ""}
+          </p>
 
-          <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
+          <SubmitButton
+            disabled={createBookingWithData === undefined || !selectedOption}
+            pendingLabel="Reserving...">
             Reserve now
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </div>
