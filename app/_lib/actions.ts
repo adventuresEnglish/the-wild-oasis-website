@@ -58,6 +58,8 @@ export async function createBookingAction(
     status: "unconfirmed",
   };
 
+  console.log(newBooking);
+
   const { error } = await supabase.from("bookings").insert([newBooking]);
 
   if (error) {
@@ -67,8 +69,8 @@ export async function createBookingAction(
 
   // a malicious user could change the disabled logic on the client so here it would be necessary to check if the user is authorized to create a booking and the dates are available
 
+  redirect("/cabins/thankyou");
   revalidatePath(`/cabins/${bookingData.cabinId}`);
-  //redirect("/cabins/thankyou");
 }
 
 export async function updateBookingAction(
@@ -81,7 +83,7 @@ export async function updateBookingAction(
   const numGuests = parseInt(formData.get("numGuests") as string);
   const observations = formData.get("observations") as string;
 
-  //const reservationId = Number(formData.get("reservationId"));
+  //const reservationId = Number(formData.get("reservationId"))
 
   const guestBookings: Booking[] = await getBookings(
     session?.user?.guestId ?? ""

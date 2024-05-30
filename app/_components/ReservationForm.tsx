@@ -3,10 +3,9 @@
 import { differenceInDays } from "date-fns";
 import Image from "next/image";
 import { useState } from "react";
-import { createBookingAction } from "../_lib/actions";
 import { formatDate } from "../_lib/helpers";
-import { Cabin, User, ValidatedBookingData } from "../_lib/types";
-import { validateBookingData } from "../_lib/validation";
+import { Cabin, User } from "../_lib/types";
+import { useBookedDates } from "./BookedDatesContext";
 import { useReservation } from "./ReservationContext";
 import SubmitButton from "./SubmitButton";
 
@@ -30,9 +29,11 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
     cabinPrice,
   };
 
-  const createBookingWithData = validateBookingData(bookingData)
-    ? createBookingAction.bind(null, bookingData as ValidatedBookingData)
-    : undefined;
+  // const createBookingWithData = validateBookingData(bookingData)
+  //   ? createBookingAction.bind(null, bookingData as ValidatedBookingData)
+  //   : undefined;
+
+  const {handleCreateBookingWithData} = useBookedDates();
 
   return (
     <div className="scale-[1.01]">
@@ -61,7 +62,7 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
 
       <form
         action={async (formData) => {
-          await createBookingWithData!(formData);
+          await handleCreateBookingWithData!(bookingData, formData)
           resetRange();
           setSelectedOption("");
         }}
@@ -120,7 +121,7 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
           </p>
 
           <SubmitButton
-            disabled={createBookingWithData === undefined || !selectedOption}
+            disabled={!endDate === undefined || !selectedOption}
             pendingLabel="Reserving...">
             Reserve now
           </SubmitButton>
