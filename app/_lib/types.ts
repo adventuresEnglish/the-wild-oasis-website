@@ -53,8 +53,8 @@ export type Country = {
 export type TFilter = "all" | "small" | "medium" | "large";
 
 export type BookingDates = {
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
 };
 
 export type Settings = {

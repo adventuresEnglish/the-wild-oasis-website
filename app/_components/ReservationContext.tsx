@@ -31,7 +31,7 @@ function ReservationProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetRange: SelectRangeEventHandler = (val) => val && setRange(val);
 
-  const resetRange = () => setRange({ from: undefined, to: undefined });
+  const resetRange = () => setRange(initialState.range);
 
   return (
     <ReservationContext.Provider

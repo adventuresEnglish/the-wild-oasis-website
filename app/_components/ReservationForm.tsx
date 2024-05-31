@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { formatDate } from "../_lib/helpers";
 import { Cabin, User } from "../_lib/types";
+import { bookingDataSchema } from "../_lib/validations";
 import { useBookedDates } from "./BookedDatesContext";
 import { useReservation } from "./ReservationContext";
 import SubmitButton from "./SubmitButton";
@@ -18,7 +19,7 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
   const startDate = range.from;
   const endDate = range.to;
 
-  const numNights = differenceInDays(startDate!, endDate!);
+  const numNights = differenceInDays(endDate!, startDate!);
   const cabinPrice = numNights * (regularPrice - discount);
 
   const bookingData = {
@@ -28,12 +29,9 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
     numNights,
     cabinPrice,
   };
+  const validatedBookingData = bookingDataSchema.safeParse(bookingData);
 
-  // const createBookingWithData = validateBookingData(bookingData)
-  //   ? createBookingAction.bind(null, bookingData as ValidatedBookingData)
-  //   : undefined;
-
-  const {handleCreateBookingWithData} = useBookedDates();
+  const { handleCreateBookingWithData } = useBookedDates();
 
   return (
     <div className="scale-[1.01]">
@@ -62,7 +60,15 @@ function ReservationForm({ cabin, user }: { cabin: Cabin; user: User }) {
 
       <form
         action={async (formData) => {
-          await handleCreateBookingWithData!(bookingData, formData)
+          if (!validatedBookingData.success) {
+            resetRange();
+            setSelectedOption("");
+            throw new Error("Invalid booking data");
+          }
+          await handleCreateBookingWithData(
+            validatedBookingData.data,
+            formData
+          );
           resetRange();
           setSelectedOption("");
         }}

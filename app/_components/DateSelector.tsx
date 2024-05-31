@@ -36,30 +36,8 @@ function DateSelector({ settings, cabin, bookedDates }: DateSelectorProps) {
 
   const { minBookingLength, maxBookingLength } = settings;
 
- 
-  //   const [optimisticBookedDates, optimisticAdd] = useOptimistic(
-  //     bookedDates,
-  //     (currentBookedDates, bookingData: ValidatedBookingData) => {
-  //       return currentBookedDates = [...currentBookedDates, bookingData.startDate, bookingData.endDate]
-  //     }
-  //   );
-    
-
-  //  async function createBookingWithData(bookingData: BookingData) {
-  //   validateBookingData(bookingData)
-  //   ? await createBookingAction.bind(null, bookingData as ValidatedBookingData)
-  //   : undefined;
-  //  }
-
-  // async function handleCreateBookingWithData(bookingData: BookingData) {
-  //   optimisticAdd(bookingData as ValidatedBookingData);
-  //   await createBookingWithData(bookingData);
-  // }
-
-  const {optimisticBookedDates} = useBookedDates()
-
-
-
+  const { optimisticBookedDates } = useBookedDates();
+  //console.log(optimisticBookedDates);
 
   return (
     <div className="flex flex-col justify-between">
@@ -77,7 +55,7 @@ function DateSelector({ settings, cabin, bookedDates }: DateSelectorProps) {
         numberOfMonths={2}
         disabled={(curDate) =>
           isPast(curDate) ||
-        optimisticBookedDates.some((date) => isSameDay(date, curDate))
+          optimisticBookedDates.some((date) => isSameDay(date, curDate))
         }
       />
 

@@ -1,11 +1,13 @@
 "use server";
 
+import { isWithinInterval } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn, signOut } from "./auth";
-import { getBookings } from "./data-service";
+import { getBookedDatesByCabinId, getBookings } from "./data-service";
 import supabase from "./supabase";
-import { Booking, Session, ValidatedBookingData } from "./types";
+import { Booking, Session } from "./types";
+import { bookingDataSchema, newBookingSchema } from "./validations";
 
 export async function updateGuestAction(formData: FormData) {
   const session = (await auth()) as Session;
@@ -40,37 +42,71 @@ export async function updateGuestAction(formData: FormData) {
 }
 
 export async function createBookingAction(
-  bookingData: ValidatedBookingData,
+  bookingData: unknown,
+  //bookingData: ValidatedBookingData,
   formData: FormData
 ) {
   const session = (await auth()) as Session;
-  if (!session) throw new Error("You are not logged in.");
+  if (!session.user) throw new Error("You are not logged in.");
+
+  console.log("bookingData", bookingData);
+  const validatedBookingData = bookingDataSchema.safeParse(bookingData);
+  if (!validatedBookingData.success) {
+    console.log(validatedBookingData.error);
+    throw new Error("Invalid booking data");
+  }
+
+  function isAlreadyBooked(startDate: Date, endDate: Date, datesArr: Date[]) {
+    return datesArr.some((date) =>
+      isWithinInterval(date, { start: startDate, end: endDate })
+    );
+  }
+  const bookedDates = await getBookedDatesByCabinId(
+    validatedBookingData.data.cabinId
+  );
+  const isBookedDatesValid = !isAlreadyBooked(
+    validatedBookingData.data.startDate,
+    validatedBookingData.data.endDate,
+    bookedDates
+  );
+  if (!isBookedDatesValid) {
+    throw new Error("The cabin is already booked for the selected dates");
+  }
 
   const newBooking = {
-    ...bookingData,
-    guestId: session?.user?.guestId,
+    ...validatedBookingData.data,
+    //...bookingData,
+    guestId: session.user.guestId,
     numGuests: Number(formData.get("numGuests")),
     observations: formData.get("observations")?.slice(0, 1000),
     extrasPrice: 0,
-    totalPrice: bookingData.cabinPrice,
+    //totalPrice: bookingData.cabinPrice,
+    totalPrice: validatedBookingData.data.cabinPrice,
     isPaid: false,
     hasBreakfast: false,
     status: "unconfirmed",
   };
-
   console.log(newBooking);
+  const validatedNewBooking = newBookingSchema.safeParse(newBooking);
+  if (!validatedNewBooking.success) {
+    console.log(validatedNewBooking.error);
+    throw new Error("Invalid booking data");
+  }
 
-  const { error } = await supabase.from("bookings").insert([newBooking]);
+  const { error } = await supabase
+    .from("bookings")
+    .insert([validatedNewBooking.data]);
+  //const { error } = await supabase.from("bookings").insert([newBooking]);
 
   if (error) {
     console.error(error);
     throw new Error("Booking could not be created");
   }
 
-  // a malicious user could change the disabled logic on the client so here it would be necessary to check if the user is authorized to create a booking and the dates are available
+  revalidatePath(`/cabins/${validatedBookingData.data.cabinId}`);
+  //revalidatePath(`/cabins/${bookingData.cabinId}`);
 
   redirect("/cabins/thankyou");
-  revalidatePath(`/cabins/${bookingData.cabinId}`);
 }
 
 export async function updateBookingAction(
