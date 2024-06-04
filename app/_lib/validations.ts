@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COUNTRIES } from "./constants";
 
 export const bookingDataSchema = z.object({
   cabinId: z.number(),
@@ -22,3 +23,10 @@ export const newBookingSchema = bookingDataSchema.extend({
 });
 
 export type TNewBooking = z.infer<typeof newBookingSchema>;
+
+export const updateGuestSchema = z.object({
+  nationality: z.enum(COUNTRIES),
+  nationalId: z.string().refine((value) => /^[a-zA-Z0-9]{6,12}$/.test(value), {
+    message: "National ID must only contain letters and numbers",
+  }),
+});

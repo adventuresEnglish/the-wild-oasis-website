@@ -7,27 +7,34 @@ import { auth, signIn, signOut } from "./auth";
 import { getBookedDatesByCabinId, getBookings } from "./data-service";
 import supabase from "./supabase";
 import { Booking, Session } from "./types";
-import { bookingDataSchema, newBookingSchema } from "./validations";
+import {
+  bookingDataSchema,
+  newBookingSchema,
+  updateGuestSchema,
+} from "./validations";
 
 export async function updateGuestAction(formData: FormData) {
   const session = (await auth()) as Session;
-
   if (!session) throw new Error("You are not logged in.");
 
-  const nationalID = formData.get("nationalID") as string; // could also be type file
-  const nationality = formData.get("nationality"); //as string;
-  //const natData = formData.get("nationality") as string;
-  //const [nationality, countryFlag] = natData.split("%");
+  // const nationalID = formData.get("nationalID") as string; // could also be type file
+  // const nationality = formData.get("nationality");
 
-  if (!/^[a-zA-Z0-9]{6,12}$/.test(nationalID))
-    throw new Error("Invalid national ID");
+  // if (!/^[a-zA-Z0-9]{6,12}$/.test(nationalID))
+  //   throw new Error("Invalid national ID");
 
-  const updateData = { nationality, nationalID };
-  //const updateData = { nationality, countryFlag, nationalID };
+  // const updateData = { nationality, nationalID };
+  const updateData = Object.fromEntries(formData.entries());
 
-  const { data, error } = await supabase
+  const validatedUpdateData = updateGuestSchema.safeParse(updateData);
+  if (!validatedUpdateData.success) {
+    console.log(validatedUpdateData.error);
+    throw new Error("Invalid guest data");
+  }
+
+  const { error } = await supabase
     .from("guests")
-    .update(updateData)
+    .update(validatedUpdateData.data)
     .eq("id", session?.user?.guestId);
 
   if (error) {
@@ -38,13 +45,13 @@ export async function updateGuestAction(formData: FormData) {
   //redirect("/account/profile");
 
   //apparently the router cache should be invalidated after 30 seconds but mine is invalidated immediately so this doesn't seem necessary, at least in development
-  //update. I just read that cache is that the router cache is invalidated immediately in development mode but no in production mode
+  //update. I just read that cache is that the router cache is invalidated immediately in development mode but not in production mode
 }
 
 export async function createBookingAction(
   bookingData: unknown,
   //bookingData: ValidatedBookingData,
-  formData: FormData
+  formData: FormData,
 ) {
   const session = (await auth()) as Session;
   if (!session.user) throw new Error("You are not logged in.");
@@ -58,16 +65,16 @@ export async function createBookingAction(
 
   function isAlreadyBooked(startDate: Date, endDate: Date, datesArr: Date[]) {
     return datesArr.some((date) =>
-      isWithinInterval(date, { start: startDate, end: endDate })
+      isWithinInterval(date, { start: startDate, end: endDate }),
     );
   }
   const bookedDates = await getBookedDatesByCabinId(
-    validatedBookingData.data.cabinId
+    validatedBookingData.data.cabinId,
   );
   const isBookedDatesValid = !isAlreadyBooked(
     validatedBookingData.data.startDate,
     validatedBookingData.data.endDate,
-    bookedDates
+    bookedDates,
   );
   if (!isBookedDatesValid) {
     throw new Error("The cabin is already booked for the selected dates");
@@ -111,7 +118,7 @@ export async function createBookingAction(
 
 export async function updateBookingAction(
   reservationId: string,
-  formData: FormData
+  formData: FormData,
 ) {
   const session = (await auth()) as Session;
   if (!session) throw new Error("You are not logged in.");
@@ -122,7 +129,7 @@ export async function updateBookingAction(
   //const reservationId = Number(formData.get("reservationId"))
 
   const guestBookings: Booking[] = await getBookings(
-    session?.user?.guestId ?? ""
+    session?.user?.guestId ?? "",
   );
   const guestBookingIds = guestBookings.map((booking) => booking.id);
 
@@ -153,7 +160,7 @@ export async function deleteBookingAction(bookingId: number) {
 
   //The next few lines of code create a list of bookings for the current user and then checks if the bookingId is in the list. If it is not, the user is not authorized to delete the booking.
   const guestBookings: Booking[] = await getBookings(
-    session?.user?.guestId ?? ""
+    session?.user?.guestId ?? "",
   );
   const guestBookingIds = guestBookings.map((booking) => booking.id);
 

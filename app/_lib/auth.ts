@@ -1,9 +1,9 @@
-import NextAuth, { Account, Profile, Session } from "next-auth";
+import NextAuth, { Account, Profile } from "next-auth";
 import { AdapterUser } from "next-auth/adapters";
 import Google from "next-auth/providers/google";
 import { NextRequest } from "next/server";
 import { createGuest, getGuest } from "./data-service";
-import { User } from "./types";
+import { Session, User } from "./types";
 
 const authConfig = {
   providers: [
