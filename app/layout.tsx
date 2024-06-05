@@ -1,6 +1,6 @@
+import Header from "@/app/_components/Header";
 import "@/app/_styles/globals.css";
 import { Josefin_Sans } from "next/font/google";
-import Header from "./_components/Header";
 import { ReservationProvider } from "./_components/ReservationContext";
 
 const josefin = Josefin_Sans({
@@ -24,10 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${josefin.className} antialiased relative bg-primary-950 text-primary-100 min-h-screen flex flex-col`}>
+        className={`${josefin.className} relative flex min-h-screen flex-col bg-primary-950 text-primary-100 antialiased`}
+      >
         <Header />
-        <div className="flex-1 px-8 py-12 grid">
-          <main className="max-w-7xl mx-auto w-full">
+        <div className="grid flex-1 px-8 py-12">
+          <main className="mx-auto w-full max-w-7xl">
             <ReservationProvider>{children}</ReservationProvider>
           </main>
         </div>
