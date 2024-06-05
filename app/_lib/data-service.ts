@@ -8,7 +8,7 @@ import { Booking, BookingDates, Guest } from "./types";
 /////////////
 // GET
 
-export async function getCabin(id: string) {
+export async function getCabin(id: number) {
   const { data, error } = await supabase
     .from("cabins")
     .select("*")
@@ -99,7 +99,7 @@ export async function getBookings(guestId: string) {
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
     .select(
-      "id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image)"
+      "id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image)",
     )
     .eq("guestId", guestId)
     .order("startDate");

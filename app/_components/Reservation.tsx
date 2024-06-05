@@ -9,28 +9,25 @@ import ReservationForm from "./ReservationForm";
 async function Reservation({ cabin }: { cabin: Cabin }) {
   const [settings, bookedDates] = await Promise.all([
     getSettings(),
-    getBookedDatesByCabinId(cabin.id as unknown as string),
+    getBookedDatesByCabinId(cabin.id as unknown as number),
   ]);
 
   const session = await auth();
 
   return (
     <BookedDatesProvider bookedDates={bookedDates}>
-    <div className="grid grid-cols-2 border border-primary-800 min-h-[400px]">
-      <DateSelector
-        settings={settings}
-        bookedDates={bookedDates}
-        cabin={cabin}
-      />
-      {session?.user ? (
-        <ReservationForm
+      <div className="grid min-h-[400px] grid-cols-2 border border-primary-800">
+        <DateSelector
+          settings={settings}
+          bookedDates={bookedDates}
           cabin={cabin}
-          user={session.user as User}
         />
-      ) : (
-        <LoginMessage />
-      )}
-    </div>
+        {session?.user ? (
+          <ReservationForm cabin={cabin} user={session.user as User} />
+        ) : (
+          <LoginMessage />
+        )}
+      </div>
     </BookedDatesProvider>
   );
 }
